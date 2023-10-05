@@ -1,73 +1,81 @@
-#include "Arduino.h"
-#include "DFRobotDFPlayerMini.h"
+#include <DFPlayerMini_Fast.h>
 
 // DF Mini player
 #if (defined(ARDUINO_AVR_UNO) || defined(ESP8266))   // Using a soft serial port
-#define FPSerial Serial
+#include <SoftwareSerial.h>
+SoftwareSerial softSerial(/*rx =*/4, /*tx =*/5);
+#define FPSerial softSerial
 #else
 #define FPSerial Serial1
 #endif
 
-DFRobotDFPlayerMini myDFPlayer;
+DFPlayerMini_Fast myDFPlayer;
 
 // GSM 
+
+void play_track(int num)
+{
+  myDFPlayer.play(num);
+  delay(1000);
+  myDFPlayer.isPlaying();
+}
 
 void select_audio(uint8_t num)
 {
   switch(num) {
-  case 1: myDFPlayer.play(1);  //Play the first mp3
+  case 1: play_track(1);
 	  break;
-  case 2: myDFPlayer.play(2);  //Play the next mp3
+  case 2: play_track(2);
 	  break;
-  case 3: myDFPlayer.play(3);
+  case 3: play_track(3);
 	  break;
-  case 4: myDFPlayer.play(4);
+  case 4: play_track(4);
 	  break;
-  case 5: myDFPlayer.play(5);
+  case 5: play_track(5);
 	  break;
-  case 6: myDFPlayer.play(6);
+  case 6: play_track(6);
 	  break;
-  case 7: myDFPlayer.play(7);
+  case 7: play_track(7);
 	  break;
-  case 8: myDFPlayer.play(8);
+  case 8: play_track(8);
 	  break;
-  case 9: myDFPlayer.play(9);
+  case 9: play_track(9);
 	  break;
-  case 10: myDFPlayer.play(10);
+  case 10: play_track(10);
 	  break;
-  case 11: myDFPlayer.play(11);
+  case 11: play_track(11);
 	  break;
-  case 12: myDFPlayer.play(12);
+  case 12: play_track(12);
 	  break;
-  case 13: myDFPlayer.play(13);
+  case 13: play_track(13);
 	  break;
-  case 14: myDFPlayer.play(14);
+  case 14: play_track(14);
 	  break;
-  case 15: myDFPlayer.play(15);
+  case 15: play_track(15);
 	  break;
-  case 16: myDFPlayer.play(16);
+  case 16: play_track(16);
 	  break;
-  case 17: myDFPlayer.play(17);
+  case 17: play_track(17);
 	  break;
-  case 18: myDFPlayer.play(18);
+  case 18: play_track(18);
 	  break;
-  case 19: myDFPlayer.play(19);
+  case 19: play_track(19);
 	  break;
-  case 20: myDFPlayer.play(20);
+  case 20: play_track(20);
 	  break;
-  case 30: myDFPlayer.play(21);
+  case 30: play_track(21);
 	  break;
-  case 40: myDFPlayer.play(22);
+  case 40: play_track(22);
 	  break;
-  case 50: myDFPlayer.play(23);
+  case 50: play_track(23);
 	  break;
-  case 60: myDFPlayer.play(24);
+  case 60: play_track(24);
 	  break;
-  case 70: myDFPlayer.play(25);
+  case 70: play_track(25);
   	break;
-  case 80: myDFPlayer.play(26);
+  case 80: play_track(26);
 	  break;
-  case 90: myDFPlayer.play(27);
+  case 90: play_track(27);
 	  break;
   }
 };
@@ -76,12 +84,12 @@ void play_denomination(uint8_t n)
 {
   switch(n)
   {
-    case 1: myDFPlayer.play(29); // thousand
+    case 1: play_track(29); // thousand
       break;
-    case 2: myDFPlayer.play(28); // hundred
+    case 2: play_track(28); // hundred
       break;
     case 3:
-    default: myDFPlayer.play(31); // rupees
+    default: play_track(31); // rupees
       break;
   }
 }
@@ -98,9 +106,9 @@ void break_amount(uint8_t val)
 void play_amount(int amount)
 {
  uint8_t ones_tens = (amount % 100);
- uint8_t hundreds = (amount / 100);
+ uint8_t hundreds = (amount / 100)%10;
  uint8_t thousands = (amount / 1000);
- myDFPlayer.play(30); // You have received
+ play_track(30); // You have received
 
  // Thousands
  if(thousands > 0) {
@@ -108,7 +116,7 @@ void play_amount(int amount)
   break_amount(thousands);
  else
   select_audio(thousands);
- play_denomination(1);
+  play_denomination(1);
  }
 
  // Hundreds
@@ -128,16 +136,21 @@ void play_amount(int amount)
 void setup()
 { 
   /* Setup code for DFPlayerMini */
-  FPSerial.begin(9600, SERIAL_8N1, /*rx1 =*/3, /*tx1 =*/1);
+#if (defined ESP32)
+  FPSerial.begin(9600, SERIAL_8N1, /*rx =*/2, /*tx =*/4);
+#else
+  FPSerial.begin(9600);
+#endif
+  
+  Serial.begin(115200);
 
-  // Use serial to communicate with mp3.
-  if (!myDFPlayer.begin(FPSerial, /*isACK = */true, /*doReset = */true)) {  
-    Serial.println(F("Unable to begin:"));
-    Serial.println(F("1.Please recheck the connection!"));
-    Serial.println(F("2.Please insert the SD card!"));
-  }
+  Serial.println();
 
-  Serial.begin(9600);
+  if (myDFPlayer.begin(FPSerial, true))
+    Serial.println("myDFPlayer Player ready");
+  else
+    Serial.println("myDFPlayer Player NOT READY");
+
   myDFPlayer.volume(30);  //Set volume value. From 0 to 30
 
   /* GSM module setup code */
@@ -145,11 +158,10 @@ void setup()
 
 void loop()
 {
-  int prev_amount, amount;
-  // play_amount(amount);
-  FPSerial.println("Hello from DFPlayerMini!\n");
+  int prev_amount, amount = 1456;
   
   // If button press
-  // play_amount(prev_amount);
+  play_amount(amount);
+  
   prev_amount = amount;
 }

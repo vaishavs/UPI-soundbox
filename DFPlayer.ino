@@ -160,8 +160,9 @@ void loop()
 {
   int prev_amount, amount = 1456;
   
-  // If button press
   play_amount(amount);
   
   prev_amount = amount;
+  // If button press
+  // play_amount(prev_amount);
 }

@@ -137,7 +137,7 @@ void setup()
 { 
   /* Setup code for DFPlayerMini */
 #if (defined ESP32)
-  FPSerial.begin(9600, SERIAL_8N1, /*rx =*/2, /*tx =*/4);
+  FPSerial.begin(9600, SERIAL_8N1, /*rx =*/4, /*tx =*/5);
 #else
   FPSerial.begin(9600);
 #endif
@@ -160,9 +160,8 @@ void loop()
 {
   int prev_amount, amount = 1456;
   
+  // If button press
   play_amount(amount);
   
   prev_amount = amount;
-  // If button press
-  // play_amount(prev_amount);
 }

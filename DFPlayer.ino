@@ -160,9 +160,8 @@ void setup()
 void loop()
 {
   uint32_t prev_amount, amount = 87056;
-  
-  // If button press
+
   play_amount(amount);
-  
+
   prev_amount = amount;
 }

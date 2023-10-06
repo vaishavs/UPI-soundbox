@@ -13,7 +13,7 @@ DFPlayerMini_Fast myDFPlayer;
 
 // GSM 
 
-void play_track(int num)
+void play_track(uint8_t num)
 {
   myDFPlayer.play(num);
   delay(1000);
@@ -103,11 +103,12 @@ void break_amount(uint8_t val)
   select_audio(rem);
 }
 
-void play_amount(int amount)
+void play_amount(uint32_t amount)
 {
  uint8_t ones_tens = (amount % 100);
  uint8_t hundreds = (amount / 100)%10;
  uint8_t thousands = (amount / 1000);
+ delay(2000);
  play_track(30); // You have received
 
  // Thousands
@@ -158,7 +159,10 @@ void setup()
 
 void loop()
 {
-  int amount = 1456;
+  uint32_t prev_amount, amount = 87056;
   
+  // If button press
   play_amount(amount);
+  
+  prev_amount = amount;
 }

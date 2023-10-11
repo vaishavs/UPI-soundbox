@@ -1,6 +1,7 @@
 #include <DFPlayerMini_Fast.h>
 
-#if (defined(ARDUINO_AVR_UNO) || defined(ESP8266))   // Using a soft serial port
+// Configuring serial port for DFPlayer mini
+#if (defined(ARDUINO_AVR_UNO) || defined(ESP8266))
 #include <SoftwareSerial.h>
 SoftwareSerial softSerial(/*rx =*/4, /*tx =*/5);
 #define FPSerial softSerial
@@ -10,6 +11,7 @@ SoftwareSerial softSerial(/*rx =*/4, /*tx =*/5);
 
 DFPlayerMini_Fast myDFPlayer;
 
+/* For playing a specific digit */
 void play_track(uint8_t num)
 {
   myDFPlayer.play(num);
@@ -81,17 +83,17 @@ void play_denomination(uint8_t n)
 {
   switch(n)
   {
-    case 1: play_track(29); // thousand
+    case 1: play_track(29); // Play "thousand"
       break;
-    case 2: play_track(28); // hundred
+    case 2: play_track(28); // Play "hundred"
       break;
     case 3:
-    default: play_track(31); // rupees
+    default: play_track(31); // Play "rupees"
       break;
   }
 }
 
-// Break ones and tens into individual digits
+/* Break ones and tens into individual digits */
 void break_amount(uint8_t val)
 {
   uint8_t rem = val % 10;
@@ -101,6 +103,7 @@ void break_amount(uint8_t val)
   select_audio(rem);
 }
 
+/* Break the total amount into thousands, hundreds, and tens & ones */
 void play_amount(uint32_t amount)
 {
  uint8_t ones_tens = (amount % 100);
@@ -132,6 +135,7 @@ void play_amount(uint32_t amount)
 
 int firstline = 0;
 int data;
+
 void setup() {
   Serial.begin(9600);
 

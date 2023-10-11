@@ -1,5 +1,4 @@
 #include <DFPlayerMini_Fast.h>
-int amount=0;
 
 #if (defined(ARDUINO_AVR_UNO) || defined(ESP8266))   // Using a soft serial port
 #include <SoftwareSerial.h>

@@ -153,11 +153,11 @@ void setup() {
 #endif
 
   if (myDFPlayer.begin(FPSerial, true))
-    Serial.println("myDFPlayer Player ready");
+    Serial.println("myDFPlayer ready");
   else
-    Serial.println("myDFPlayer Player NOT READY");
+    Serial.println("myDFPlayer NOT READY");
 
-  myDFPlayer.volume(30);  //Set volume value. From 0 to 30
+  myDFPlayer.volume(30);  // Set maximum volume
 }
 void loop() { 
 

@@ -1,5 +1,5 @@
 #include <DFPlayerMini_Fast.h>
-
+int amount=0;
 // DF Mini player
 #if (defined(ARDUINO_AVR_UNO) || defined(ESP8266))   // Using a soft serial port
 #include <SoftwareSerial.h>
@@ -17,7 +17,7 @@ void play_track(uint8_t num)
 {
   myDFPlayer.play(num);
   delay(1000);
-  myDFPlayer.isPlaying();
+  while(myDFPlayer.isPlaying());
 }
 
 void select_audio(uint8_t num)
@@ -108,8 +108,8 @@ void play_amount(uint32_t amount)
  uint8_t ones_tens = (amount % 100);
  uint8_t hundreds = (amount / 100)%10;
  uint8_t thousands = (amount / 1000);
- delay(2000);
- play_track(30); // You have received
+ //delay(2000);
+ //play_track(30); // You have received
 
  // Thousands
  if(thousands > 0) {
@@ -134,18 +134,25 @@ void play_amount(uint32_t amount)
  play_denomination(3);
 }
 
-void setup()
-{ 
-  /* Setup code for DFPlayerMini */
+int firstline = 0;
+int data;
+void setup() {
+  Serial.begin(9600);
+  Serial2.begin(9600);
+  delay(3000);
+  test_sim800_module();
+  receive_SMS();
+
+    /* Setup code for DFPlayerMini */
 #if (defined ESP32)
   FPSerial.begin(9600, SERIAL_8N1, /*rx =*/4, /*tx =*/5);
 #else
   FPSerial.begin(9600);
 #endif
   
-  Serial.begin(115200);
+ // Serial.begin(115200);
 
-  Serial.println();
+  //Serial.println();
 
   if (myDFPlayer.begin(FPSerial, true))
     Serial.println("myDFPlayer Player ready");
@@ -153,30 +160,55 @@ void setup()
     Serial.println("myDFPlayer Player NOT READY");
 
   myDFPlayer.volume(30);  //Set volume value. From 0 to 30
-
-  /* GSM module setup code */
-    Serial2.begin(9600);
-  delay(3000);
-  test_sim800_module();
- RECEIVE_SMS();
 }
+void loop() { 
 
-void loop()
-{
-  uint32_t prev_amount, amount = 87056;
-  
-    //send_SMS();
- RECEIVE_SMS();
-  updateSerial();
+ if (Serial2.available() > 0)
+  {
+    String mpm = Serial2.readStringUntil('\n');
+    Serial.println(mpm);
+    int mpmlen = mpm.length();
+    Serial.println(mpmlen);
+    int prev_index_val = 0, current_index_val = 0;
+    if (firstline == 1)
+    {
+      current_index_val = mpm.indexOf("Rs.", prev_index_val);
+     String one_at_a_time_str1 = mpm.substring(current_index_val + 3, current_index_val + 10);
+      Serial.print(one_at_a_time_str1);
+      Serial.println(".");
+      data = one_at_a_time_str1.toInt();
+      // Serial.println(data);
+          Serial.print("Amount: ");
+    Serial.println(data);
+    delay(2000);
 
-  play_amount(amount);
-
-  prev_amount = amount;
+ play_track(30);
+ delay(1000);
+    play_amount(data);
+      firstline = 0;
+    }
+    if (mpm.startsWith("+CMT: \"+918220090759\""))
+    {
+      current_index_val = mpm.indexOf(',', prev_index_val);
+      prev_index_val = current_index_val + 1;
+      current_index_val = mpm.indexOf(',', prev_index_val);
+      prev_index_val = current_index_val + 1;
+      current_index_val = mpm.indexOf(',', prev_index_val);
+      prev_index_val = current_index_val + 1;
+      String one_at_a_time_str = mpm.substring(prev_index_val, prev_index_val + 5);
+      Serial.println(one_at_a_time_str);
+      firstline = 1;
+      delay(100);
+    }
+    //    Serial.write(Serial2.read());
+  }
+  if (Serial.available() > 0)
+    Serial2.write(Serial.read());
+		  
 }
-
 void test_sim800_module()
 {
-  Serial.println("AT");
+  Serial2.println("AT");
   updateSerial();
   Serial.println();
   Serial2.println("AT+CSQ");
@@ -195,112 +227,32 @@ void updateSerial()
   delay(500);
   while (Serial.available())
   {
-    Serial2.write(Serial.read());//Forward what Serial received to Software Serial Port
+   Serial2.write(Serial.read());//Forward what Serial received to Software Serial Port
   }
   while (Serial2.available())
   {
     Serial.write(Serial2.read());//Forward what Software Serial received to Serial Port
   }
+  //Serial.println(mess1);
+  //Serial.println(mess2);
 }
-void updateSerial_val()
-{
-  delay(500);
-  while (Serial2.available())
-  {
-    //delay(3);
-    mess[j]=Serial2.read();//Forward what Software Serial received to Serial Port
-    j++;
-  }
-  j=0;
-}
-
 void send_SMS()
 {
   Serial2.println("AT+CMGF=1"); // Configuring TEXT mode
   updateSerial();
-  Serial2.println("AT+CMGR=\"+919629055521\"");//change ZZ with country code and xxxxxxxxxxx with phone number to sms
+  Serial2.println("AT+CMGS=\"+919804049270\"");// phone number to sms
   updateSerial();
-  Serial2.print("hi ANBURAJ"); //text content
+Serial.println();
+  Serial.println("Message Sent");
+  Serial2.write(26);
+}
+void receive_SMS()
+{
+   Serial2.println("AT+CMGF=1"); // Configuring TEXT mode
+  updateSerial();
+  Serial2.println("AT+CNMI=1,2,0,0,0");
   updateSerial();
   Serial.println();
-  Serial.println("Message sent");
+  Serial.println("Message RECEIVED");
   Serial2.write(26);
-}
-void text_extract(String s)
-{
-
-    char a[30]="Rs.";
-
-    char b[10];
-
-    int i=0,j=0,l=0;
-
-    while(s[i]!='\0')
-
-    {
-
-        if(s[i]==a[j])
-
-        {
-
-            if(s[i+1]==a[j+1])
-
-            {
-
-                if(s[i+2]==a[j+2])
-
-                {
-
-                    for(int k=i+3;s[k]!=' ';k++)
-
-                    {
-
-                        b[l]=s[k];
-                         Serial.println(b[l]);
-                        l++;
-
-                    }
-                    b[l]='\0';
-                    Serial.println("debug");
-                    Serial.println(b);
-			//call convert string and play amount
-                }
-
-            }
-
-        }
-
-        i++;
-
-    }
-
- 
-
-}
-
-void RECEIVE_SMS()
-{
-  int k=0;
-  char mob[11];
-   while (!(Serial2.available()));
-  Serial2.print("AT+CMGF=1"); // Configuring TEXT mode
-  updateSerial_val();
-  Serial2.print("AT+CNMI=1,2,0,0,0");
-  Serial.println("1");
-  Serial.println(mess);
-  for(k=12;k<=21;k++){
-    mob[k-12]=mess[k];
-   Serial.print(mess[k]);}
-   mob[10]='\0';
-  // delay(3);
-   Serial.println("start");
-    Serial.println(mob);
-   Serial.println("check");
- // cmp_str(mob);
-  Serial.println("done");
-  if(!(strcmp(mob,"8838528218"))){
-  text_extract(mess);}
-  Serial.println("Message Received");
-  Serial2.write(26);
-  
 }

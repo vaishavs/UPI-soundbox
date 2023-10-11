@@ -1,6 +1,6 @@
 #include <DFPlayerMini_Fast.h>
 int amount=0;
-// DF Mini player
+
 #if (defined(ARDUINO_AVR_UNO) || defined(ESP8266))   // Using a soft serial port
 #include <SoftwareSerial.h>
 SoftwareSerial softSerial(/*rx =*/4, /*tx =*/5);
@@ -10,8 +10,6 @@ SoftwareSerial softSerial(/*rx =*/4, /*tx =*/5);
 #endif
 
 DFPlayerMini_Fast myDFPlayer;
-
-// GSM 
 
 void play_track(uint8_t num)
 {
@@ -94,6 +92,7 @@ void play_denomination(uint8_t n)
   }
 }
 
+// Break ones and tens into individual digits
 void break_amount(uint8_t val)
 {
   uint8_t rem = val % 10;
@@ -108,8 +107,6 @@ void play_amount(uint32_t amount)
  uint8_t ones_tens = (amount % 100);
  uint8_t hundreds = (amount / 100)%10;
  uint8_t thousands = (amount / 1000);
- //delay(2000);
- //play_track(30); // You have received
 
  // Thousands
  if(thousands > 0) {
@@ -138,21 +135,19 @@ int firstline = 0;
 int data;
 void setup() {
   Serial.begin(9600);
+
+  /* Setup code for GSM module */
   Serial2.begin(9600);
   delay(3000);
   test_sim800_module();
   receive_SMS();
 
-    /* Setup code for DFPlayerMini */
+  /* Setup code for DFPlayerMini */
 #if (defined ESP32)
   FPSerial.begin(9600, SERIAL_8N1, /*rx =*/4, /*tx =*/5);
 #else
   FPSerial.begin(9600);
 #endif
-  
- // Serial.begin(115200);
-
-  //Serial.println();
 
   if (myDFPlayer.begin(FPSerial, true))
     Serial.println("myDFPlayer Player ready");
@@ -173,18 +168,16 @@ void loop() {
     if (firstline == 1)
     {
       current_index_val = mpm.indexOf("Rs.", prev_index_val);
-     String one_at_a_time_str1 = mpm.substring(current_index_val + 3, current_index_val + 10);
+      String one_at_a_time_str1 = mpm.substring(current_index_val + 3, current_index_val + 10);
       Serial.print(one_at_a_time_str1);
       Serial.println(".");
       data = one_at_a_time_str1.toInt();
-      // Serial.println(data);
-          Serial.print("Amount: ");
-    Serial.println(data);
-    delay(2000);
-
- play_track(30);
- delay(1000);
-    play_amount(data);
+      Serial.print("Amount: ");
+      Serial.println(data);
+      delay(2000);
+      play_track(30); // Play "You have received"
+      delay(1000);
+      play_amount(data); // Play the amount
       firstline = 0;
     }
     if (mpm.startsWith("+CMT: \"+918220090759\""))
@@ -227,11 +220,11 @@ void updateSerial()
   delay(500);
   while (Serial.available())
   {
-   Serial2.write(Serial.read());//Forward what Serial received to Software Serial Port
+   Serial2.write(Serial.read()); //Forward what Serial received to Software Serial Port
   }
   while (Serial2.available())
   {
-    Serial.write(Serial2.read());//Forward what Software Serial received to Serial Port
+    Serial.write(Serial2.read()); //Forward what Software Serial received to Serial Port
   }
   //Serial.println(mess1);
   //Serial.println(mess2);
@@ -240,7 +233,7 @@ void send_SMS()
 {
   Serial2.println("AT+CMGF=1"); // Configuring TEXT mode
   updateSerial();
-  Serial2.println("AT+CMGS=\"+919804049270\"");// phone number to sms
+  Serial2.println("AT+CMGS=\"+919804049270\""); // phone number to sms
   updateSerial();
 Serial.println();
   Serial.println("Message Sent");

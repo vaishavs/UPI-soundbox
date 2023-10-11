@@ -1,6 +1,6 @@
 #include <DFPlayerMini_Fast.h>
 
-// Configuring serial port for DFPlayer mini
+/* Configuring a serial port for DFPlayer mini */
 #if (defined(ARDUINO_AVR_UNO) || defined(ESP8266))
 #include <SoftwareSerial.h>
 SoftwareSerial softSerial(/*rx =*/4, /*tx =*/5);

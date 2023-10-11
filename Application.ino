@@ -168,6 +168,7 @@ void loop() {
     int mpmlen = mpm.length();
     Serial.println(mpmlen);
     int prev_index_val = 0, current_index_val = 0;
+
     if (firstline == 1)
     {
       current_index_val = mpm.indexOf("Rs.", prev_index_val);
@@ -183,17 +184,16 @@ void loop() {
       play_amount(data); // Play the amount
       firstline = 0;
     }
-    if (mpm.startsWith("+CMT: \"+918220090759\""))
+
+    if (mpm.startsWith("+CMT:"))
     {
-      current_index_val = mpm.indexOf(',', prev_index_val);
-      prev_index_val = current_index_val + 1;
-      current_index_val = mpm.indexOf(',', prev_index_val);
-      prev_index_val = current_index_val + 1;
-      current_index_val = mpm.indexOf(',', prev_index_val);
-      prev_index_val = current_index_val + 1;
-      String one_at_a_time_str = mpm.substring(prev_index_val, prev_index_val + 5);
+      current_index_val = mpm.indexOf('+', prev_index_val);
+      // prev_index_val = current_index_val + 1;
+      String one_at_a_time_str = mpm.substring(prev_index_val+19, prev_index_val + 25);
       Serial.println(one_at_a_time_str);
-      firstline = 1;
+      String test="+40554";
+      if(one_at_a_time_str==test){
+      firstline = 1;}
       delay(100);
     }
     //    Serial.write(Serial2.read());

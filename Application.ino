@@ -238,13 +238,13 @@ void send_SMS()
   updateSerial();
   Serial2.println("AT+CMGS=\"+919804049270\""); // phone number to sms
   updateSerial();
-Serial.println();
+  Serial.println();
   Serial.println("Message Sent");
   Serial2.write(26);
 }
 void receive_SMS()
 {
-   Serial2.println("AT+CMGF=1"); // Configuring TEXT mode
+  Serial2.println("AT+CMGF=1"); // Configuring TEXT mode
   updateSerial();
   Serial2.println("AT+CNMI=1,2,0,0,0");
   updateSerial();

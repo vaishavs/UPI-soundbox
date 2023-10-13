@@ -1,0 +1,51 @@
+const int pushButtonPrev = 2;  
+const int pushButtonNext = 3; 
+const int pushButtonCurrent = 4; 
+
+const int n = 100;  
+int data[n];         
+
+int currentIndex = 0; 
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(pushButtonPrev, INPUT);  
+  pinMode(pushButtonNext, INPUT);
+  pinMode(pushButtonCurrent, INPUT);
+
+ 
+  for (int i = 0; i < n; i++) {
+    data[i] = i * 10; 
+    Serial.println(data[i]);
+  }
+}
+
+void loop() {
+  int buttonPrevState = digitalRead(pushButtonPrev);
+  int buttonNextState = digitalRead(pushButtonNext);
+  int buttonCurrentState = digitalRead(pushButtonCurrent);
+
+
+  if (buttonPrevState == HIGH) {
+    currentIndex = (currentIndex - 1 + n) % n; 
+    delay(2000);
+    Serial.print("Previous Value at Index ");
+    Serial.print(currentIndex);
+    Serial.print(": ");
+    Serial.println(data[currentIndex]);
+  } else if (buttonNextState == HIGH) {
+    currentIndex = (currentIndex + 1) % n; 
+    delay(2000); 
+    Serial.print("Next Value at Index ");
+    Serial.print(currentIndex);
+    Serial.print(": ");
+    Serial.println(data[currentIndex]);
+  } else if (buttonCurrentState == HIGH) {
+    Serial.print("Current Value at Index ");
+    Serial.print(currentIndex);
+    Serial.print(": ");
+    Serial.println(data[currentIndex]);
+    delay(2000);
+  }
+}
+

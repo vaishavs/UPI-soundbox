@@ -1,0 +1,46 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+
+const char* ssid = "Redmi 8A";      // Replace with your Wi-Fi SSID
+const char* password = "12345678";  // Replace with your Wi-Fi password
+
+void setup() {
+  Serial.begin(9600);
+  delay(1000);
+
+  // Connect to Wi-Fi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+}
+
+void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+
+    // Replace the placeholders with actual values
+    String url = "http://httpbin.org/get";
+
+    // Add your PhonePe API key or access token in the request headers
+    http.addHeader("Authorization", "6ab24e24ae92646c82e0450f029478117d8a1a0a00390e266ea1178a0c68e419###1");
+
+    http.begin(url);
+
+    // Send an HTTP GET request
+    int httpCode = http.GET();
+
+    if (httpCode == HTTP_CODE_OK) {
+      String response = http.getString();
+      Serial.println("Response: " + response);
+    } else {
+      Serial.println("Error during HTTP request");
+    }
+
+    http.end();
+  }
+
+  delay(10000);  // Wait for 10 seconds before the next request
+}

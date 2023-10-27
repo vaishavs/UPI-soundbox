@@ -1,0 +1,50 @@
+const express = require('express');
+const app = express();
+const port = 4000; // Choose a port for your server
+
+app.use(express.json()); // Middleware to parse JSON request bodies
+
+// Define your sample data
+let data = [
+  { id: 1, name: 'Transaction 1', amount: 100, status: 'success' },
+  
+];
+
+// Define a route to serve the data
+app.get('/transactions', (req, res) => {
+  res.json(data);
+});
+
+// Create a new transaction (POST request)
+
+app.post('/transactions', (req, res) => {
+  const newTransaction = req.body; // Assuming the request body contains the new transaction data
+  data.push(newTransaction);
+  res.status(201).json(newTransaction); // Respond with the created data and a 201 status code
+});
+
+
+// Update a transaction (PUT request)
+
+  app.put('/transactions', (req, res) => {
+  const transactionId = parseInt(req.params.id);
+  const updatedTransaction = req.body; // Assuming the request body contains the updated transaction data
+
+  // Find and update the transaction with the provided ID
+  const transactionIndex = data.findIndex((transaction) => transaction.id === transactionId);
+  if (transactionIndex !== -1) {
+    data[transactionIndex] = { ...data[transactionIndex], ...updatedTransaction };
+    res.json(data[transactionIndex]); // Respond with the updated data
+  } else {
+    res.status(404).json({ error: 'Transaction not found' }); // Respond with a 404 status code if the transaction doesn't exist
+  }
+  
+  
+ 
+ });
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
